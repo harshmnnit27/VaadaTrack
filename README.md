@@ -1,301 +1,123 @@
-# 🗳️ VaadaTrack — Election Manifesto & Promise Tracker
+# VaadaTrack 🗳️
+> Hold Indian politicians accountable — track election promises, verify fulfillment, demand transparency.
 
-A full-stack MERN + AI project that tracks Indian political party manifestos,
-extracts promises using Claude AI, and lets users verify whether promises were kept.
+A full-stack **MERN + AI** web application that indexes election manifestos, extracts party promises using AI, and lets users verify whether those promises were kept.
 
-**Tech Stack:** MongoDB · Express · React · Node.js · Tailwind CSS · Claude AI (Anthropic) · RAG (TF-IDF)
+## Screenshots
 
----
+### Home Page
+<img width="1467" height="800" alt="Screenshot 2026-06-14 at 11 37 45 PM" src="https://github.com/user-attachments/assets/9d0cf7b8-dcd9-4d2f-ad46-451858a9d486" />
 
-## 📁 Folder Structure
+### Parties & Fulfillment Stats
+<!-- Add screenshot here -->
 
-```
-vaadatrack/
-├── backend/
-│   ├── config/          db.js
-│   ├── controllers/     authController, partyController, promiseController,
-│   │                    manifestoController, aiController
-│   ├── middleware/       auth.js
-│   ├── models/          User, Party, Promise, Manifesto
-│   ├── routes/          authRoutes, partyRoutes, promiseRoutes,
-│   │                    manifestoRoutes, aiRoutes
-│   ├── services/        aiService.js (Anthropic SDK)
-│   │                    ragService.js (TF-IDF RAG)
-│   ├── utils/           seed.js
-│   ├── .env             ← YOU MUST FILL THIS
-│   └── server.js
-└── frontend/
-    ├── public/
-    └── src/
-        ├── components/  Navbar, Footer, PartyCard, PromiseCard, common UI
-        ├── context/     AuthContext.js
-        ├── pages/       Home, Parties, PartyDetail, Promises, PromiseDetail,
-        │                Manifestos, Chat (AI), Compare, Login, Register, Admin
-        └── services/    api.js (all Axios calls)
-```
+### Promise Tracker
+<!-- Add screenshot here -->
+
+### AI Chat (VaadaBot)
+<!-- Add screenshot here -->
+
+### Manifesto Q&A (RAG)
+<!-- Add screenshot here -->
+
+### Compare Parties
+<!-- Add screenshot here -->
+
+### Admin Panel
+<!-- Add screenshot here -->
 
 ---
 
-## ✅ STEP 1 — Prerequisites (Install these first)
+## Features
 
-| Tool | Download |
-|------|----------|
-| Node.js (v18+) | https://nodejs.org |
-| MongoDB Community | https://www.mongodb.com/try/download/community |
-| Git | https://git-scm.com |
-| VS Code | https://code.visualstudio.com |
-
-> After installing MongoDB, start it:
-> - **Windows:** MongoDB runs as a service automatically after install
-> - **Mac:** `brew services start mongodb-community`
-> - **Linux:** `sudo systemctl start mongod`
+- **Promise Tracker** — Filter promises by party, category, status, and election year
+- **Manifesto Archive** — Upload manifesto text; AI auto-indexes every promise
+- **RAG-based Q&A** — Ask questions answered directly from the manifesto text (no hallucination)
+- **AI Chat (VaadaBot)** — General political Q&A powered by LLaMA 3.3 70B via Groq
+- **Party Comparison** — AI compares two parties on any topic using manifesto excerpts
+- **Community Voting** — Users vote on whether a promise was fulfilled
+- **Admin Panel** — Manage parties, promises; bulk AI extraction and analysis
+- **JWT Auth** — Role-based access (admin / user)
 
 ---
 
-## ✅ STEP 2 — Open in VS Code
+## Tech Stack
 
-1. Open VS Code
-2. File → Open Folder → select the `vaadatrack` folder
-3. Open Terminal in VS Code: `Ctrl + `` ` (backtick)
-
----
-
-## ✅ STEP 3 — Set your API Keys
-
-Open `backend/.env` and fill in:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/vaadatrack
-JWT_SECRET=vaadatrack_super_secret_2024_change_me
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxx   ← Get from console.anthropic.com
-PORT=5000
-NODE_ENV=development
-```
-
-> Get your Anthropic API key at: https://console.anthropic.com/
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React, Tailwind CSS, Chart.js |
+| Backend | Node.js, Express.js |
+| Database | MongoDB Atlas (Mongoose) |
+| AI | Groq API — LLaMA 3.3 70B (free) |
+| RAG | Custom TF-IDF embeddings + Cosine Similarity |
+| Auth | JWT + bcrypt |
 
 ---
 
-## ✅ STEP 4 — Install Dependencies
-
-In the VS Code terminal, run these ONE BY ONE:
+## Setup & Run
 
 ```bash
-# Root
-npm install
+# 1. Clone the repo
+git clone https://github.com/harshmnnit27/VaadaTrack.git
+cd VaadaTrack
 
-# Backend
-cd backend
-npm install
-cd ..
+# 2. Install dependencies
+cd backend && npm install && cd ../frontend && npm install
 
-# Frontend
-cd frontend
-npm install
-cd ..
-```
+# 3. Configure environment — create backend/.env
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=any_random_string
+GROQ_API_KEY=gsk_...         # free at console.groq.com
+PORT=8000
 
----
-
-## ✅ STEP 5 — Seed Sample Data (Recommended)
-
-This adds BJP, INC, AAP, SP, BSP with ~12 sample promises:
-
-```bash
+# 4. Seed sample data (5 parties, 12 promises, 10 manifestos)
 cd backend
 node utils/seed.js
-cd ..
+node utils/seedManifestos.js
+
+# 5. Run (open two terminals)
+cd backend && npm start       # Terminal 1
+cd frontend && npm start      # Terminal 2
 ```
 
-Expected output:
-```
-Connected to MongoDB
-Admin created: admin@vaadatrack.com / admin123
-Created 5 parties
-Created 12 promises
-Party stats updated
-✅ Seed complete!
-```
-
-**Admin login:** `admin@vaadatrack.com` / `admin123`
+App runs at `http://localhost:3000`  
+Admin login: `admin@vaadatrack.com` / `admin123`
 
 ---
 
-## ✅ STEP 6 — Run the App (Development)
+## Project Structure
 
-Open **two terminals** in VS Code:
-
-**Terminal 1 — Backend:**
-```bash
-cd backend
-npm run dev
 ```
-You'll see: `Server running on port 5000` and `MongoDB Connected`
-
-**Terminal 2 — Frontend:**
-```bash
-cd frontend
-npm start
-```
-Browser opens at **http://localhost:3000** automatically.
-
-> OR from the root folder, run both together:
-> ```bash
-> npm run dev
-> ```
-
----
-
-## ✅ STEP 7 — Use the App
-
-### As a regular user:
-1. Browse parties at `/parties`
-2. Click a party to see its promise fulfillment stats
-3. Go to `/promises` to filter by category, status, party
-4. Go to `/chat` for AI-powered Q&A about Indian politics
-
-### As admin (admin@vaadatrack.com / admin123):
-1. Login and go to `/admin`
-2. **Parties tab** — Add/edit/delete parties
-3. **Promises tab** — Add promises manually, update their status
-4. **Extract AI tab** — Select an indexed manifesto → AI extracts all promises automatically
-5. **Analyze AI tab** — AI analyzes each promise and sets fulfillment status
-
-### Upload a Manifesto (Admin):
-1. Go to `/manifestos`
-2. Click "Add Manifesto"
-3. Paste the manifesto text (copy from party website or PDF)
-4. Select party, election name, year
-5. Click Submit — AI will index it in the background (~30 seconds)
-6. Once status shows "indexed", you can ask AI questions about it
-
----
-
-## 🤖 AI Features
-
-| Feature | Where | What it does |
-|---------|-------|-------------|
-| General Chat | `/chat` | Talk to VaadaBot about any political topic |
-| RAG Q&A | `/chat` (RAG mode) | Ask questions answered FROM the actual manifesto text |
-| AI Extract | Admin → Extract AI | Reads manifesto, extracts 10-20 promises, saves to DB |
-| AI Analyze | Admin → Analyze AI | Reads promise + evidence, sets Fulfilled/Broken/etc. |
-| Compare Manifestos | `/compare` | AI compares two party manifestos on a topic |
-
----
-
-## 🚀 DEPLOY — Option A: Render + MongoDB Atlas (Free)
-
-### Step A1: MongoDB Atlas (Free Cloud DB)
-1. Go to https://cloud.mongodb.com
-2. Create free account → Create free cluster (M0)
-3. Database Access → Add user (username + password)
-4. Network Access → Allow from anywhere (0.0.0.0/0)
-5. Connect → Get connection string like:
-   ```
-   mongodb+srv://user:password@cluster0.xxxxx.mongodb.net/vaadatrack
-   ```
-
-### Step A2: Push to GitHub
-```bash
-# In the vaadatrack root folder
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/vaadatrack.git
-git push -u origin main
-```
-
-### Step A3: Deploy Backend on Render
-1. Go to https://render.com → New → Web Service
-2. Connect your GitHub repo
-3. Settings:
-   - **Root Directory:** `backend`
-   - **Build Command:** `npm install`
-   - **Start Command:** `node server.js`
-4. Add Environment Variables:
-   ```
-   MONGODB_URI = mongodb+srv://...  (your Atlas URI)
-   JWT_SECRET  = vaadatrack_super_secret_2024
-   ANTHROPIC_API_KEY = sk-ant-...
-   NODE_ENV = production
-   PORT = 10000
-   ```
-5. Click Deploy — note the URL like `https://vaadatrack-api.onrender.com`
-
-### Step A4: Deploy Frontend on Render (or Vercel)
-
-**Option: Render Static Site**
-1. New → Static Site → same repo
-2. Settings:
-   - **Root Directory:** `frontend`
-   - **Build Command:** `npm install && npm run build`
-   - **Publish Directory:** `build`
-3. Add env variable:
-   ```
-   REACT_APP_API_URL = https://vaadatrack-api.onrender.com/api
-   ```
-
-**Option: Vercel (easier)**
-1. Go to https://vercel.com → Import Git Repo
-2. Set Root Directory to `frontend`
-3. Add env: `REACT_APP_API_URL = https://vaadatrack-api.onrender.com/api`
-4. Deploy
-
-### Step A5: Update frontend API base URL
-
-In `frontend/src/services/api.js`, change:
-```js
-const api = axios.create({ baseURL: '/api' });
-```
-to:
-```js
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '/api'
-});
+VaadaTrack/
+├── backend/
+│   ├── controllers/     # Route handlers
+│   ├── models/          # MongoDB schemas (User, Party, Promise, Manifesto)
+│   ├── routes/          # REST API endpoints
+│   ├── services/        # aiService.js (Groq), ragService.js (TF-IDF)
+│   └── utils/           # seed.js, seedManifestos.js, reindexManifestos.js
+└── frontend/
+    └── src/
+        ├── components/  # Navbar, Cards, common UI
+        ├── pages/       # Home, Parties, Promises, Chat, Compare, Admin
+        └── services/    # api.js (all Axios calls)
 ```
 
 ---
 
-## 🚀 DEPLOY — Option B: Railway (Easiest, everything in one)
+## How RAG Works
 
-1. Go to https://railway.app
-2. New Project → Deploy from GitHub
-3. Add two services: `backend` (Node) and `frontend` (Static/Node)
-4. Set env variables same as Render above
-5. Railway gives you a single dashboard for both
-
----
-
-## 🐛 Common Errors & Fixes
-
-| Error | Fix |
-|-------|-----|
-| `MongoDB connection refused` | Start MongoDB locally: `mongod` or use Atlas |
-| `Cannot GET /api/...` | Backend not running — run `npm run dev` in backend |
-| `ANTHROPIC_API_KEY is invalid` | Check your key in `backend/.env`, no extra spaces |
-| `Module not found` | Run `npm install` in both backend and frontend |
-| Frontend shows blank page | Check browser console, likely API URL mismatch |
-| `nodemon not found` | `cd backend && npm install` |
-| Manifesto stuck at "processing" | Check backend terminal for errors — usually API key issue |
+1. Manifesto text is split into 100-word chunks with 20-word overlap
+2. Each chunk is vectorized using TF-IDF
+3. User query is vectorized the same way
+4. Cosine similarity finds the top-5 most relevant chunks
+5. Chunks are passed as context to Groq LLM → grounded, accurate answer
 
 ---
 
-## 📝 What's Left to Add (Future)
+## Deploy
 
-- PDF upload via multer (wiring for actual file upload is ready, just needs frontend UI)
-- Evidence URLs for each promise
-- News article scraping to auto-verify promises
-- Twitter/X mentions tracker for party accountability
-- State-level election tracking
-- Mobile app (React Native)
+- **Database:** MongoDB Atlas (free M0 cluster)
+- **Backend:** Render.com → root dir: `backend`, start: `node server.js`
+- **Frontend:** Vercel → root dir: `frontend`
 
----
-
-## 🔑 Default Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@vaadatrack.com | admin123 |
-
-> Change these after first login in production!
+Add env variables on Render: `MONGODB_URI`, `GROQ_API_KEY`, `JWT_SECRET`, `PORT=10000`
