@@ -11,9 +11,17 @@ const connectDB = require('./config/db');
 dotenv.config();
 connectDB();
 
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    process.env.FRONTEND_URL,
+    // Add Vercel preview domains if needed, or simply let the FRONTEND_URL handle the production domain.
+  ].filter(Boolean),
+  credentials: true,
+};
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
