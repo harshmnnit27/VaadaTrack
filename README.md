@@ -1,123 +1,93 @@
-# VaadaTrack 🗳️
-> Hold Indian politicians accountable — track election promises, verify fulfillment, demand transparency.
+# 🏛️ VaadaTrack - Political Manifesto Tracker & AI Assistant
 
-A full-stack **MERN + AI** web application that indexes election manifestos, extracts party promises using AI, and lets users verify whether those promises were kept.
+![VaadaTrack Banner](./docs/images/banner.png)
 
-## Screenshots
+> An intelligent, full-stack application built to track, analyze, and compare political party manifestos using Retrieval-Augmented Generation (RAG) and Large Language Models (LLMs).
 
-### Home Page
-<img width="1467" height="800" alt="Screenshot 2026-06-14 at 11 37 45 PM" src="https://github.com/user-attachments/assets/9d0cf7b8-dcd9-4d2f-ad46-451858a9d486" />
+## ✨ Features
 
-### Parties & Fulfillment Stats
-<!-- Add screenshot here -->
+- **🤖 AI-Powered "Ask Manifesto" Chat:** Ask complex questions about a specific party's promises and get accurate, context-aware answers powered by Groq and LLaMA 3.
+- **📊 Cross-Party Comparison:** Select multiple political parties and instantly compare their manifestos side-by-side on key issues like Healthcare, Economy, and Education.
+- **🛡️ Secure Admin Dashboard:** Protected routes allowing administrators to upload new manifesto PDFs, extract text, generate semantic embeddings, and sync them to the database.
+- **⚡ Blazing Fast RAG Pipeline:** Custom TF-IDF chunking and cosine similarity search algorithm built natively in Node.js for lightning-fast manifesto retrieval.
+- **📱 Responsive & Polished UI:** Beautiful, modern glass-morphic interface built with Tailwind CSS and React Markdown.
 
-### Promise Tracker
-<!-- Add screenshot here -->
+## 📸 Screenshots
 
-### AI Chat (VaadaBot)
-<!-- Add screenshot here -->
+*(Please replace these placeholder paths with actual screenshots of your application!)*
 
-### Manifesto Q&A (RAG)
-<!-- Add screenshot here -->
+| Home Dashboard | AI Chat Interface |
+|:---:|:---:|
+| <img src="./docs/images/home.png" width="400"/> | <img src="./docs/images/chat.png" width="400"/> |
+| **Manifesto Comparison** | **Admin PDF Upload** |
+| <img src="./docs/images/compare.png" width="400"/> | <img src="./docs/images/admin.png" width="400"/> |
 
-### Compare Parties
-<!-- Add screenshot here -->
+## 🛠️ Technology Stack
 
-### Admin Panel
-<!-- Add screenshot here -->
+**Frontend:**
+- React.js
+- Tailwind CSS (with `@tailwindcss/typography` for markdown)
+- Axios & React Router
 
----
+**Backend:**
+- Node.js & Express.js
+- MongoDB & Mongoose (Database & Embeddings storage)
+- PDF-Parse (Document extraction)
+- Groq SDK (LLM inference)
+- JSON Web Tokens (JWT Auth)
 
-## Features
+**Deployment:**
+- Docker & Docker Compose (Containerization)
+- Nginx (Reverse Proxy)
+- Vercel (Frontend Hosting)
+- Render.com (Backend API Hosting)
 
-- **Promise Tracker** — Filter promises by party, category, status, and election year
-- **Manifesto Archive** — Upload manifesto text; AI auto-indexes every promise
-- **RAG-based Q&A** — Ask questions answered directly from the manifesto text (no hallucination)
-- **AI Chat (VaadaBot)** — General political Q&A powered by LLaMA 3.3 70B via Groq
-- **Party Comparison** — AI compares two parties on any topic using manifesto excerpts
-- **Community Voting** — Users vote on whether a promise was fulfilled
-- **Admin Panel** — Manage parties, promises; bulk AI extraction and analysis
-- **JWT Auth** — Role-based access (admin / user)
+## 🚀 Quick Start (Local Development)
 
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React, Tailwind CSS, Chart.js |
-| Backend | Node.js, Express.js |
-| Database | MongoDB Atlas (Mongoose) |
-| AI | Groq API — LLaMA 3.3 70B (free) |
-| RAG | Custom TF-IDF embeddings + Cosine Similarity |
-| Auth | JWT + bcrypt |
-
----
-
-## Setup & Run
-
+### 1. Clone the repository
 ```bash
-# 1. Clone the repo
-git clone https://github.com/harshmnnit27/VaadaTrack.git
+git clone https://github.com/yourusername/VaadaTrack.git
 cd VaadaTrack
+```
 
-# 2. Install dependencies
-cd backend && npm install && cd ../frontend && npm install
-
-# 3. Configure environment — create backend/.env
-MONGODB_URI=mongodb+srv://...
-JWT_SECRET=any_random_string
-GROQ_API_KEY=gsk_...         # free at console.groq.com
+### 2. Set up Environment Variables
+Create a `.env` file in the `backend/` directory:
+```env
 PORT=8000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_jwt_key
+GROQ_API_KEY=your_groq_api_key
+FRONTEND_URL=http://localhost:3000
+```
 
-# 4. Seed sample data (5 parties, 12 promises, 10 manifestos)
+### 3. Run with Docker (Recommended)
+You can spin up the entire stack using Docker Compose:
+```bash
+docker-compose up --build
+```
+The app will be available at `http://localhost`.
+
+### 4. Run Manually without Docker
+**Start the Backend:**
+```bash
 cd backend
-node utils/seed.js
-node utils/seedManifestos.js
-
-# 5. Run (open two terminals)
-cd backend && npm start       # Terminal 1
-cd frontend && npm start      # Terminal 2
+npm install
+npm run dev
 ```
 
-App runs at `http://localhost:3000`  
-Admin login: `admin@vaadatrack.com` / `admin123`
-
----
-
-## Project Structure
-
+**Start the Frontend:**
+```bash
+cd frontend
+npm install
+npm start
 ```
-VaadaTrack/
-├── backend/
-│   ├── controllers/     # Route handlers
-│   ├── models/          # MongoDB schemas (User, Party, Promise, Manifesto)
-│   ├── routes/          # REST API endpoints
-│   ├── services/        # aiService.js (Groq), ragService.js (TF-IDF)
-│   └── utils/           # seed.js, seedManifestos.js, reindexManifestos.js
-└── frontend/
-    └── src/
-        ├── components/  # Navbar, Cards, common UI
-        ├── pages/       # Home, Parties, Promises, Chat, Compare, Admin
-        └── services/    # api.js (all Axios calls)
-```
+The app will be available at `http://localhost:3000`.
 
----
+## 🧠 How the AI (RAG) Works
+1. **Ingestion:** Admins upload a PDF manifesto. The backend parses the PDF into raw text.
+2. **Chunking & Embeddings:** The text is split into semantic chunks. We calculate a TF-IDF vocabulary and generate vectors for each chunk, saving them to MongoDB.
+3. **Retrieval:** When a user asks a question, the backend calculates the cosine similarity between the user's query and the manifesto chunks, pulling the top 5 most relevant sections.
+4. **Generation:** The relevant context is injected into a prompt and sent to Groq's LLaMA 3 model to generate a highly accurate, hallucination-free response.
 
-## How RAG Works
-
-1. Manifesto text is split into 100-word chunks with 20-word overlap
-2. Each chunk is vectorized using TF-IDF
-3. User query is vectorized the same way
-4. Cosine similarity finds the top-5 most relevant chunks
-5. Chunks are passed as context to Groq LLM → grounded, accurate answer
-
----
-
-## Deploy
-
-- **Database:** MongoDB Atlas (free M0 cluster)
-- **Backend:** Render.com → root dir: `backend`, start: `node server.js`
-- **Frontend:** Vercel → root dir: `frontend`
-
-Add env variables on Render: `MONGODB_URI`, `GROQ_API_KEY`, `JWT_SECRET`, `PORT=10000`
+## 📄 License
+This project is licensed under the MIT License.
