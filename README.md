@@ -81,7 +81,7 @@ cd frontend
 npm install
 npm start
 ```
-The app will be available at `http://localhost:3000`.
+The app will be available at `http://vaada-track-ten.vercel.app`.
 
 ## 🧠 How the AI (RAG) Works
 1. **Ingestion:** Admins upload a PDF manifesto. The backend parses the PDF into raw text.
