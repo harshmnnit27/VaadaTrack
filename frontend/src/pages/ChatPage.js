@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { aiAPI, manifestoAPI, partyAPI } from '../services/api';
 import { LoadingSpinner } from '../components/common';
+import ReactMarkdown from 'react-markdown';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
@@ -107,13 +108,21 @@ export default function ChatPage() {
       </div>
 
       {/* Chat window */}
-      <div className="card mb-4 h-96 overflow-y-auto p-4 space-y-4">
+      <div className="card mb-4 h-[500px] overflow-y-auto p-4 space-y-5 shadow-inner" style={{ backgroundColor: 'var(--bg-default)' }}>
         {messages.map((msg, i) => (
           <div key={i} className={`msg-appear flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
-              msg.role === 'user' ? 'bg-primary text-white rounded-br-none' : 'rounded-bl-none'
-            }`} style={msg.role === 'user' ? {} : { backgroundColor: 'var(--bg-muted)', color: 'var(--text)' }}>
-              {msg.content}
+            <div className={`max-w-[85%] rounded-2xl px-5 py-3.5 text-sm shadow-sm ${
+              msg.role === 'user' 
+                ? 'bg-primary text-white rounded-br-none' 
+                : 'rounded-bl-none'
+            }`} style={msg.role === 'user' ? {} : { backgroundColor: 'var(--bg-card)', color: 'var(--text)', border: '1px solid var(--border)' }}>
+              {msg.role === 'user' ? (
+                <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+              ) : (
+                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-li:marker:text-primary">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         ))}

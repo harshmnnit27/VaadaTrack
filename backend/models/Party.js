@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+ const mongoose = require('mongoose');
 
 const partySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
@@ -25,3 +25,7 @@ partySchema.virtual('fulfillmentRate').get(function () {
 partySchema.set('toJSON', { virtuals: true });
 
 module.exports = mongoose.model('Party', partySchema);
+
+
+
+

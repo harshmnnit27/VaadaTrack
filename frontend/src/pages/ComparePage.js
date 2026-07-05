@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { partyAPI, manifestoAPI, aiAPI } from '../services/api';
 import { LoadingSpinner, ProgressBar } from '../components/common';
+import ReactMarkdown from 'react-markdown';
 
 export default function ComparePage() {
   const [parties, setParties] = useState([]);
@@ -143,8 +144,8 @@ export default function ComparePage() {
           <p className="text-xs" style={{ color: '#d97706' }}>⚠️ Select indexed manifestos for both parties to use AI comparison</p>
         )}
         {comparison && (
-          <div className="rounded-lg p-4 text-sm whitespace-pre-wrap leading-relaxed mt-4" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text)' }}>
-            {comparison}
+          <div className="rounded-lg p-5 mt-4 prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-li:marker:text-primary" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text)' }}>
+            <ReactMarkdown>{comparison}</ReactMarkdown>
           </div>
         )}
       </div>

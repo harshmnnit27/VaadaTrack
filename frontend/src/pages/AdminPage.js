@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { partyAPI, promiseAPI, aiAPI, manifestoAPI } from '../services/api';
 import { LoadingSpinner, StatusBadge, CategoryBadge } from '../components/common';
+import ReactMarkdown from 'react-markdown';
 
 const TABS = ['parties', 'promises', 'extract-ai', 'analyze-ai'];
 
@@ -433,7 +434,9 @@ function AnalyzePromises() {
                   <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>{p.title}</p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{p.party?.abbreviation} · {p.election} · <StatusBadge status={p.status} /></p>
                   {results[p._id] && !results[p._id].error && (
-                    <p className="text-xs mt-2 rounded p-2" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-soft)' }}>{results[p._id].analysis}</p>
+                    <div className="mt-2 rounded p-3 prose prose-sm dark:prose-invert max-w-none" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-soft)' }}>
+                      <ReactMarkdown>{results[p._id].analysis}</ReactMarkdown>
+                    </div>
                   )}
                   {results[p._id]?.error && <p className="text-xs text-red-500 mt-1">{results[p._id].error}</p>}
                 </div>

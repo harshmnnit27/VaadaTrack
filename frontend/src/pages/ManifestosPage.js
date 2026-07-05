@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { manifestoAPI, partyAPI, aiAPI } from '../services/api';
 import { LoadingSpinner, EmptyState } from '../components/common';
 import { useAuth } from '../context/AuthContext';
+import ReactMarkdown from 'react-markdown';
 
 export default function ManifestosPage() {
   const { isAdmin } = useAuth();
@@ -199,7 +200,9 @@ export default function ManifestosPage() {
                 📄 {getPartyName(selected)} — {selected.election}
               </h2>
               {selected.summary && (
-                <p className="text-sm mb-4 leading-relaxed border-l-2 pl-3" style={{ color: 'var(--text-soft)', borderColor: 'var(--primary)' }}>{selected.summary}</p>
+                <div className="mb-4 border-l-2 pl-3 prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed" style={{ color: 'var(--text-soft)', borderColor: 'var(--primary)' }}>
+                  <ReactMarkdown>{selected.summary}</ReactMarkdown>
+                </div>
               )}
 
               {selected.status === 'indexed' ? (
@@ -229,9 +232,11 @@ export default function ManifestosPage() {
                   </div>
 
                   {answer && (
-                    <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--primary-50)' }}>
+                    <div className="rounded-lg p-5" style={{ backgroundColor: 'var(--primary-50)' }}>
                       <h4 className="font-medium text-sm mb-2" style={{ color: 'var(--text)' }}>Answer:</h4>
-                      <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--text-soft)' }}>{answer.answer}</p>
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-li:marker:text-primary">
+                        <ReactMarkdown>{answer.answer}</ReactMarkdown>
+                      </div>
                       {answer.sources?.length > 0 && (
                         <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--primary-100)' }}>
                           <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Relevant manifesto sections:</p>

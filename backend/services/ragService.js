@@ -81,9 +81,10 @@ const embedChunks = async (chunks) => {
 
 const retrieveRelevantChunks = (query, chunks, topK = 5) => {
   if (!chunks || chunks.length === 0) return [];
-  const vocabulary = chunks[0]?.vocabulary || buildVocabulary(chunks);
+  const plainChunks = chunks.map(c => (c.toObject ? c.toObject() : c));
+  const vocabulary = plainChunks[0]?.vocabulary || buildVocabulary(plainChunks);
   const qVec = createTFIDFVector(query, vocabulary);
-  return chunks
+  return plainChunks
     .map(c => ({ ...c, score: cosineSimilarity(qVec, c.embedding || []) * 0.5 + keywordScore(query, c.text) * 0.5 }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 8);
