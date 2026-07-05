@@ -94,25 +94,57 @@ const extractPromises = async (req, res) => {
     category
   );
 
-  const created = await Promise.all(
-    promises.map((p) =>
-      PromiseModel.create({
-        party: manifesto.party._id,
-        manifesto: manifesto._id,
-        election: manifesto.election,
-        year: manifesto.year,
-        title: p.title,
-        description: p.description,
-        category: p.category || "Other",
-        status: "Pending",
-      }).catch(() => null)
-    )
-  );
+  const existingPromises = await PromiseModel.find({ manifesto: manifestoId });
+  const existingChunks = existingPromises.map(p => ({
+    text: `${p.title} ${p.description}`,
+    promiseId: p._id,
+    originalTitle: p.title
+  }));
+  
+  const embeddedExisting = await ragService.embedChunks(existingChunks);
+
+  const VALID_CATEGORIES = ['Agriculture', 'Economy', 'Defence', 'Education', 'Health',
+    'Infrastructure', 'Employment', 'Environment', 'Social Welfare',
+    'Taxation', 'Foreign Policy', 'Governance', 'Technology', 'Other'];
+
+  const previewPromises = promises.map((p) => {
+    let isDuplicate = false;
+    let duplicateOf = null;
+
+    if (embeddedExisting.length > 0) {
+      const match = ragService.retrieveRelevantChunks(`${p.title} ${p.description}`, embeddedExisting, 1)[0];
+      if (match && match.score > 0.6) {
+        isDuplicate = true;
+        duplicateOf = match.originalTitle;
+      }
+    }
+
+    // Ensure category matches schema enum exactly
+    let validCategory = "Other";
+    if (p.category) {
+      const matched = VALID_CATEGORIES.find(c => c.toLowerCase() === p.category.toLowerCase());
+      if (matched) validCategory = matched;
+    }
+
+    return {
+      party: manifesto.party._id,
+      partyName: manifesto.party.name,
+      partyAbbreviation: manifesto.party.abbreviation,
+      manifesto: manifesto._id,
+      election: manifesto.election,
+      year: manifesto.year,
+      title: p.title,
+      description: p.description,
+      category: validCategory,
+      status: "Pending", // Fulfillment status
+      isDuplicate,
+      duplicateOf
+    };
+  });
 
   res.json({
     extracted: promises.length,
-    created: created.filter(Boolean).length,
-    promises: created.filter(Boolean),
+    promises: previewPromises,
   });
 };
 
