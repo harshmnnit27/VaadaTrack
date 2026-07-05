@@ -57,7 +57,7 @@ PORT=8000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_jwt_key
 GROQ_API_KEY=your_groq_api_key
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=vaada-track-ten.vercel.app
 ```
 
 ### 3. Run with Docker (Recommended)
@@ -65,7 +65,7 @@ You can spin up the entire stack using Docker Compose:
 ```bash
 docker-compose up --build
 ```
-The app will be available at `http://localhost`.
+The app will be available at `vaada-track-ten.vercel.app`.
 
 ### 4. Run Manually without Docker
 **Start the Backend:**
