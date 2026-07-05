@@ -70,8 +70,34 @@ const votePromise = async (req, res) => {
   if (type === 'up') promise.upvotes++;
   else promise.downvotes++;
   promise.voters.push(req.user._id);
+
+  // Auto-calculate status based on community votes
+  const totalVotes = promise.upvotes + promise.downvotes;
+  if (totalVotes > 0) {
+    const fulfilledRatio = promise.upvotes / totalVotes;
+    let newStatus = 'Pending';
+    
+    if (fulfilledRatio > 0.66) {
+      newStatus = 'Fulfilled';
+    } else if (fulfilledRatio > 0.50) {
+      newStatus = 'Partially Fulfilled';
+    }
+
+    // Time-based penalty: if still pending after 5 years, it is broken
+    if (newStatus === 'Pending') {
+      const currentYear = new Date().getFullYear();
+      if (currentYear - promise.year >= 5) {
+        newStatus = 'Broken';
+      }
+    }
+
+    promise.status = newStatus;
+  }
+
   await promise.save();
-  res.json({ upvotes: promise.upvotes, downvotes: promise.downvotes });
+  await updatePartyStats(promise.party);
+
+  res.json({ upvotes: promise.upvotes, downvotes: promise.downvotes, status: promise.status });
 };
 
 // GET /api/promises/stats/overview

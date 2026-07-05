@@ -14,16 +14,10 @@ export default function PartiesPage() {
     partyAPI
       .getAll(filter !== 'all' ? { state: filter } : {})
       .then((response) => {
-        console.log('=== PARTIES API RESPONSE ===');
-        console.log(response);
-        console.log('=== PARTIES DATA ===');
-        console.log(response.data);
-
         // Ensure array
         const data = Array.isArray(response.data)
           ? response.data
           : response.data?.data || [];
-
         setParties(data);
       })
       .catch((error) => {
@@ -47,10 +41,10 @@ export default function PartiesPage() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text)' }}>
           Political Parties
         </h1>
-        <p className="text-gray-600 text-sm">
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
           Explore parties and their promise fulfillment track record
         </p>
       </div>
@@ -61,11 +55,14 @@ export default function PartiesPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              filter === f
-                ? 'bg-primary text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-primary'
-            }`}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border`}
+            style={{
+              backgroundColor: filter === f ? 'var(--primary)' : 'var(--bg-card)',
+              color: filter === f ? '#fff' : 'var(--text-soft)',
+              borderColor: filter === f ? 'var(--primary)' : 'var(--border)'
+            }}
+            onMouseEnter={e => { if (filter !== f) e.currentTarget.style.borderColor = 'var(--primary)'; }}
+            onMouseLeave={e => { if (filter !== f) e.currentTarget.style.borderColor = 'var(--border)'; }}
           >
             {f === 'all' ? 'All Parties' : f}
           </button>
@@ -73,7 +70,7 @@ export default function PartiesPage() {
       </div>
 
       {/* Debug Info */}
-      <div className="mb-4 text-sm text-gray-500">
+      <div className="mb-4 text-sm" style={{ color: 'var(--text-faint)' }}>
         Parties Loaded: {parties.length}
       </div>
 

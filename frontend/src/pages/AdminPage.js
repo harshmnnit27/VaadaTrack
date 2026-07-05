@@ -21,17 +21,22 @@ export default function AdminPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">⚙️ Admin Panel</h1>
-        <p className="text-gray-600 text-sm">Manage parties, promises, and AI operations</p>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text)' }}>⚙️ Admin Panel</h1>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Manage parties, promises, and AI operations</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b mb-6">
+      <div className="flex gap-1 border-b mb-6" style={{ borderColor: 'var(--border)' }}>
         {TABS.map(t => (
           <button key={t} onClick={() => setActiveTab(t)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
-              activeTab === t ? 'border-primary text-primary' : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}>
+            className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px`}
+            style={{
+              borderColor: activeTab === t ? 'var(--primary)' : 'transparent',
+              color: activeTab === t ? 'var(--primary)' : 'var(--text-muted)'
+            }}
+            onMouseEnter={e => { if (activeTab !== t) e.currentTarget.style.color = 'var(--text)'; }}
+            onMouseLeave={e => { if (activeTab !== t) e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
             {t.replace('-', ' ')}
           </button>
         ))}
@@ -86,7 +91,7 @@ function ManageParties() {
     <div>
       {/* Form */}
       <div className="card p-5 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-4">{editId ? 'Edit Party' : 'Add New Party'}</h2>
+        <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>{editId ? 'Edit Party' : 'Add New Party'}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
           {[
             { key: 'name', placeholder: 'Full Party Name*' },
@@ -97,17 +102,17 @@ function ManageParties() {
           ].map(f => (
             <input key={f.key} placeholder={f.placeholder} value={form[f.key]}
               onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-              className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+              className="input" />
           ))}
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600">Party Color:</label>
+            <label className="text-sm" style={{ color: 'var(--text-soft)' }}>Party Color:</label>
             <input type="color" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })}
-              className="h-9 w-16 rounded border border-gray-200 cursor-pointer" />
+              className="h-9 w-16 rounded cursor-pointer" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }} />
           </div>
         </div>
         <textarea placeholder="Description" rows={2} value={form.description}
           onChange={e => setForm({ ...form, description: e.target.value })}
-          className="w-full border border-gray-200 rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:border-primary" />
+          className="input mb-3" />
         <div className="flex gap-2">
           <button onClick={handleSave} disabled={saving || !form.name || !form.abbreviation} className="btn-primary disabled:opacity-60">
             {saving ? 'Saving...' : editId ? 'Update Party' : 'Add Party'}
@@ -120,29 +125,29 @@ function ManageParties() {
       {loading ? <LoadingSpinner /> : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead style={{ backgroundColor: 'var(--bg-muted)', borderBottom: '1px solid var(--border)' }}>
               <tr>
                 {['Party', 'Abbreviation', 'State', 'Promises', 'Actions'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: 'var(--text-soft)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {parties.map(p => (
-                <tr key={p._id} className="hover:bg-gray-50">
+                <tr key={p._id} className="transition-colors hover:bg-[rgba(200,225,255,0.02)]">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                      <span className="font-medium text-gray-900">{p.name}</span>
+                      <span className="font-medium" style={{ color: 'var(--text)' }}>{p.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{p.abbreviation}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.state}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.totalPromises || 0}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>{p.abbreviation}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>{p.state}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>{p.totalPromises || 0}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <button onClick={() => handleEdit(p)} className="text-xs text-primary hover:underline">Edit</button>
-                      <button onClick={() => handleDelete(p._id)} className="text-xs text-red-600 hover:underline">Delete</button>
+                      <button onClick={() => handleEdit(p)} className="text-xs hover:underline" style={{ color: 'var(--primary)' }}>Edit</button>
+                      <button onClick={() => handleDelete(p._id)} className="text-xs text-red-500 hover:underline">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -164,7 +169,7 @@ function ManagePromises() {
   const [saving, setSaving] = useState(false);
 
   const CATEGORIES = ['Agriculture', 'Economy', 'Defence', 'Education', 'Health', 'Infrastructure', 'Employment', 'Environment', 'Social Welfare', 'Taxation', 'Governance', 'Technology', 'Other'];
-  const STATUSES = ['Fulfilled', 'Partially Fulfilled', 'Broken', 'In Progress', 'Pending', 'Unverifiable'];
+  const STATUSES = ['Fulfilled', 'Partially Fulfilled', 'Pending', 'Broken'];
 
   const load = () => {
     setLoading(true);
@@ -200,34 +205,27 @@ function ManagePromises() {
     <div>
       {/* Add form */}
       <div className="card p-5 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-4">Add Promise</h2>
+        <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>Add Promise</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-          <select value={form.party} onChange={e => setForm({ ...form, party: e.target.value })}
-            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+          <select value={form.party} onChange={e => setForm({ ...form, party: e.target.value })} className="select">
             <option value="">Select Party*</option>
             {parties.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
           </select>
           <input placeholder="Election (e.g. Lok Sabha 2024)*" value={form.election}
-            onChange={e => setForm({ ...form, election: e.target.value })}
-            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            onChange={e => setForm({ ...form, election: e.target.value })} className="input" />
           <input placeholder="Promise Title*" value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            onChange={e => setForm({ ...form, title: e.target.value })} className="input" />
           <input type="number" placeholder="Year" value={form.year}
-            onChange={e => setForm({ ...form, year: e.target.value })}
-            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
-          <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+            onChange={e => setForm({ ...form, year: e.target.value })} className="input" />
+          <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="select">
             {CATEGORIES.map(c => <option key={c}>{c}</option>)}
           </select>
-          <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
-            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+          <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="select">
             {STATUSES.map(s => <option key={s}>{s}</option>)}
           </select>
         </div>
         <textarea placeholder="Full description of the promise*" rows={3} value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          className="w-full border border-gray-200 rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:border-primary" />
+          onChange={e => setForm({ ...form, description: e.target.value })} className="input mb-3" />
         <button onClick={handleSave} disabled={saving} className="btn-primary disabled:opacity-60">
           {saving ? 'Saving...' : 'Add Promise'}
         </button>
@@ -240,18 +238,18 @@ function ManagePromises() {
             <div key={p._id} className="card p-4 flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="font-medium text-sm text-gray-900 truncate">{p.title}</span>
+                  <span className="font-medium text-sm truncate" style={{ color: 'var(--text)' }}>{p.title}</span>
                   <StatusBadge status={p.status} />
                   <CategoryBadge category={p.category} />
                 </div>
-                <p className="text-xs text-gray-500">{p.party?.abbreviation} · {p.election}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.party?.abbreviation} · {p.election}</p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <select value={p.status} onChange={e => handleStatusChange(p._id, e.target.value)}
-                  className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none">
-                  {['Fulfilled', 'Partially Fulfilled', 'Broken', 'In Progress', 'Pending', 'Unverifiable'].map(s => <option key={s}>{s}</option>)}
+                  className="text-xs rounded px-2 py-1 focus:outline-none" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text)', border: '1px solid var(--border)' }}>
+                  {['Fulfilled', 'Partially Fulfilled', 'Pending', 'Broken'].map(s => <option key={s}>{s}</option>)}
                 </select>
-                <button onClick={() => handleDelete(p._id)} className="text-xs text-red-600 hover:underline">Del</button>
+                <button onClick={() => handleDelete(p._id)} className="text-xs text-red-500 hover:underline">Del</button>
               </div>
             </div>
           ))}
@@ -286,17 +284,15 @@ function ExtractPromises() {
   return (
     <div className="max-w-2xl">
       <div className="card p-5">
-        <h2 className="font-semibold text-gray-900 mb-4">🤖 AI: Extract Promises from Manifesto</h2>
-        <p className="text-sm text-gray-600 mb-4">Select an indexed manifesto and let AI automatically extract and save all promises to the database.</p>
+        <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>🤖 AI: Extract Promises from Manifesto</h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Select an indexed manifesto and let AI automatically extract and save all promises to the database.</p>
 
         <div className="space-y-3 mb-4">
-          <select value={selectedId} onChange={e => setSelectedId(e.target.value)}
-            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+          <select value={selectedId} onChange={e => setSelectedId(e.target.value)} className="select">
             <option value="">Select Manifesto</option>
             {manifestos.map(m => <option key={m._id} value={m._id}>{m.party?.name} — {m.election}</option>)}
           </select>
-          <select value={category} onChange={e => setCategory(e.target.value)}
-            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+          <select value={category} onChange={e => setCategory(e.target.value)} className="select">
             <option value="">All Categories (recommended)</option>
             {['Agriculture', 'Economy', 'Education', 'Health', 'Employment', 'Infrastructure'].map(c => <option key={c}>{c}</option>)}
           </select>
@@ -307,9 +303,9 @@ function ExtractPromises() {
         </button>
 
         {result && (
-          <div className="mt-4 bg-green-50 rounded-lg p-4">
-            <p className="text-green-800 font-medium text-sm">✅ Done! Extracted {result.extracted} promises, saved {result.created} to database.</p>
-            <p className="text-green-700 text-xs mt-1">Go to the Promises tab to review and update statuses.</p>
+          <div className="mt-4 rounded-lg p-4" style={{ backgroundColor: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+            <p className="font-medium text-sm" style={{ color: '#10b981' }}>✅ Done! Extracted {result.extracted} promises, saved {result.created} to database.</p>
+            <p className="text-xs mt-1" style={{ color: '#059669' }}>Go to the Promises tab to review and update statuses.</p>
           </div>
         )}
       </div>
@@ -343,8 +339,8 @@ function AnalyzePromises() {
 
   return (
     <div>
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5 text-sm text-blue-800">
-        <strong>AI Promise Analyzer</strong> — Click "Analyze" on any promise to let AI determine fulfillment status based on the evidence attached. Add evidence URLs first for best results.
+      <div className="rounded-lg p-4 mb-5 text-sm border" style={{ backgroundColor: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.2)', color: 'var(--text-soft)' }}>
+        <strong style={{ color: 'var(--primary)' }}>AI Promise Analyzer</strong> — Click "Analyze" on any promise to let AI determine fulfillment status based on the evidence attached. Add evidence URLs first for best results.
       </div>
 
       {loading ? <LoadingSpinner /> : (
@@ -353,12 +349,12 @@ function AnalyzePromises() {
             <div key={p._id} className="card p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="font-medium text-sm text-gray-900">{p.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{p.party?.abbreviation} · {p.election} · <StatusBadge status={p.status} /></p>
+                  <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>{p.title}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{p.party?.abbreviation} · {p.election} · <StatusBadge status={p.status} /></p>
                   {results[p._id] && !results[p._id].error && (
-                    <p className="text-xs text-gray-600 mt-2 bg-gray-50 rounded p-2">{results[p._id].analysis}</p>
+                    <p className="text-xs mt-2 rounded p-2" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-soft)' }}>{results[p._id].analysis}</p>
                   )}
-                  {results[p._id]?.error && <p className="text-xs text-red-600 mt-1">{results[p._id].error}</p>}
+                  {results[p._id]?.error && <p className="text-xs text-red-500 mt-1">{results[p._id].error}</p>}
                 </div>
                 <button onClick={() => analyze(p._id)} disabled={analyzing[p._id]}
                   className="text-xs btn-primary flex-shrink-0 disabled:opacity-60 flex items-center gap-1">

@@ -42,7 +42,7 @@ export default function ChatPage() {
         response = data.answer;
         if (data.sources?.length) {
           response += '\n\n📄 *Sources:* ' + data.sources[0].category;
-}
+        }
       } else {
         const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
         const { data } = await aiAPI.chat(apiMessages);
@@ -69,28 +69,35 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 h-full">
+    <div className="max-w-3xl mx-auto px-4 py-8 h-full flex flex-col">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">🤖 VaadaBot — AI Chat</h1>
-        <p className="text-gray-600 text-sm">Ask anything about Indian politics and election promises</p>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text)' }}>🤖 VaadaBot — AI Chat</h1>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Ask anything about Indian politics and election promises</p>
       </div>
 
       {/* Mode switcher */}
       <div className="card p-3 mb-4 flex items-center gap-4 flex-wrap">
         <div className="flex gap-2">
           <button onClick={() => setMode('general')}
-            className={`px-3 py-1.5 rounded text-sm font-medium ${mode === 'general' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}>
+            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors`}
+            style={{
+              backgroundColor: mode === 'general' ? 'var(--primary)' : 'var(--bg-muted)',
+              color: mode === 'general' ? '#fff' : 'var(--text-soft)'
+            }}>
             💬 General Chat
           </button>
           <button onClick={() => setMode('rag')}
-            className={`px-3 py-1.5 rounded text-sm font-medium ${mode === 'rag' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}>
+            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors`}
+            style={{
+              backgroundColor: mode === 'rag' ? 'var(--primary)' : 'var(--bg-muted)',
+              color: mode === 'rag' ? '#fff' : 'var(--text-soft)'
+            }}>
             📄 Ask Manifesto (RAG)
           </button>
         </div>
 
         {mode === 'rag' && (
-          <select value={selectedManifesto} onChange={e => setSelectedManifesto(e.target.value)}
-            className="border border-gray-200 rounded px-3 py-1.5 text-sm flex-1 focus:outline-none focus:border-primary">
+          <select value={selectedManifesto} onChange={e => setSelectedManifesto(e.target.value)} className="select flex-1">
             <option value="">Select a manifesto...</option>
             {manifestos.filter(m => m.status === 'indexed').map(m => (
               <option key={m._id} value={m._id}>{getManifestoLabel(m)}</option>
@@ -104,21 +111,19 @@ export default function ChatPage() {
         {messages.map((msg, i) => (
           <div key={i} className={`msg-appear flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
-              msg.role === 'user'
-                ? 'bg-primary text-white rounded-br-none'
-                : 'bg-gray-100 text-gray-800 rounded-bl-none'
-            }`}>
+              msg.role === 'user' ? 'bg-primary text-white rounded-br-none' : 'rounded-bl-none'
+            }`} style={msg.role === 'user' ? {} : { backgroundColor: 'var(--bg-muted)', color: 'var(--text)' }}>
               {msg.content}
             </div>
           </div>
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-2xl rounded-bl-none px-4 py-3">
+            <div className="rounded-2xl rounded-bl-none px-4 py-3" style={{ backgroundColor: 'var(--bg-muted)' }}>
               <div className="flex gap-1 items-center">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--text-faint)', animationDelay: '0ms' }} />
+                <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--text-faint)', animationDelay: '150ms' }} />
+                <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--text-faint)', animationDelay: '300ms' }} />
               </div>
             </div>
           </div>
@@ -131,7 +136,10 @@ export default function ChatPage() {
         <div className="flex flex-wrap gap-2 mb-3">
           {suggestedQuestions.map(q => (
             <button key={q} onClick={() => setInput(q)}
-              className="text-xs px-3 py-1.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition-colors">
+              className="text-xs px-3 py-1.5 rounded-full border transition-colors"
+              style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--primary)'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--primary)'; }}>
               {q}
             </button>
           ))}
@@ -145,7 +153,7 @@ export default function ChatPage() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
           placeholder={mode === 'rag' ? 'Ask about this manifesto...' : 'Ask about any party, promise, or election...'}
-          className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+          className="input flex-1"
           disabled={loading || (mode === 'rag' && !selectedManifesto)}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim() || (mode === 'rag' && !selectedManifesto)}
@@ -154,7 +162,7 @@ export default function ChatPage() {
         </button>
       </div>
       {mode === 'rag' && !selectedManifesto && (
-        <p className="text-xs text-amber-600 mt-1">⚠️ Select an indexed manifesto to use RAG mode</p>
+        <p className="text-xs mt-1" style={{ color: '#d97706' }}>⚠️ Select an indexed manifesto to use RAG mode</p>
       )}
     </div>
   );

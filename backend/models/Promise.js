@@ -18,7 +18,7 @@ const promiseSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ['Fulfilled', 'Partially Fulfilled', 'Broken', 'In Progress', 'Pending', 'Unverifiable'],
+    enum: ['Fulfilled', 'Partially Fulfilled', 'Broken', 'Pending'],
     default: 'Pending'
   },
 
