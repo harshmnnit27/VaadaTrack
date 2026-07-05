@@ -7,16 +7,21 @@ import { LoadingSpinner, StatusBadge, CategoryBadge } from '../components/common
 const TABS = ['parties', 'promises', 'extract-ai', 'analyze-ai'];
 
 export default function AdminPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('parties');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('vt_admin_tab') || 'parties');
 
   useEffect(() => {
+    localStorage.setItem('vt_admin_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (loading) return;
     if (!user) navigate('/login');
     else if (!isAdmin) navigate('/');
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, loading, navigate]);
 
-  if (!isAdmin) return null;
+  if (loading || !isAdmin) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -262,10 +267,26 @@ function ManagePromises() {
 /* ── AI: Extract Promises from Manifesto ── */
 function ExtractPromises() {
   const [manifestos, setManifestos] = useState([]);
-  const [selectedId, setSelectedId] = useState('');
-  const [category, setCategory] = useState('');
-  const [result, setResult] = useState(null);
+  const [selectedId, setSelectedId] = useState(() => localStorage.getItem('vt_ai_manifesto') || '');
+  const [category, setCategory] = useState(() => localStorage.getItem('vt_ai_category') || '');
   const [loading, setLoading] = useState(false);
+  const [pendingPromises, setPendingPromises] = useState(() => {
+    const saved = localStorage.getItem('vt_ai_promises');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [savingStatus, setSavingStatus] = useState({});
+
+  useEffect(() => {
+    localStorage.setItem('vt_ai_promises', JSON.stringify(pendingPromises));
+  }, [pendingPromises]);
+
+  useEffect(() => {
+    localStorage.setItem('vt_ai_manifesto', selectedId);
+  }, [selectedId]);
+
+  useEffect(() => {
+    localStorage.setItem('vt_ai_category', category);
+  }, [category]);
 
   useEffect(() => {
     manifestoAPI.getAll().then(r => setManifestos(r.data.filter(m => m.status === 'indexed'))).catch(() => {});
@@ -273,19 +294,34 @@ function ExtractPromises() {
 
   const handle = async () => {
     if (!selectedId) return alert('Select a manifesto');
-    setLoading(true); setResult(null);
+    setLoading(true); setPendingPromises([]); setSavingStatus({});
     try {
       const { data } = await aiAPI.extractPromises(selectedId, category || undefined);
-      setResult(data);
+      setPendingPromises(data.promises || []);
     } catch (e) { alert('Error: ' + (e.response?.data?.message || e.message)); }
     finally { setLoading(false); }
+  };
+
+  const handleAdd = async (promise, index) => {
+    setSavingStatus(prev => ({...prev, [promise.title]: 'saving'}));
+    try {
+      await promiseAPI.create(promise);
+      setPendingPromises(prev => prev.filter((_, i) => i !== index));
+    } catch (e) {
+      alert('Error adding promise: ' + (e.response?.data?.message || e.message));
+      setSavingStatus(prev => ({...prev, [promise.title]: 'error'}));
+    }
+  };
+
+  const handleDiscard = (index) => {
+    setPendingPromises(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="max-w-2xl">
       <div className="card p-5">
         <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>🤖 AI: Extract Promises from Manifesto</h2>
-        <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Select an indexed manifesto and let AI automatically extract and save all promises to the database.</p>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Select an indexed manifesto and let AI automatically extract promises for you to review and approve.</p>
 
         <div className="space-y-3 mb-4">
           <select value={selectedId} onChange={e => setSelectedId(e.target.value)} className="select">
@@ -299,16 +335,61 @@ function ExtractPromises() {
         </div>
 
         <button onClick={handle} disabled={loading || !selectedId} className="btn-primary disabled:opacity-60 flex items-center gap-2">
-          {loading ? <><LoadingSpinner size="sm" /> Extracting...</> : '🤖 Extract & Save Promises'}
+          {loading ? <><LoadingSpinner size="sm" /> Extracting...</> : '🤖 Extract Promises (Preview)'}
         </button>
-
-        {result && (
-          <div className="mt-4 rounded-lg p-4" style={{ backgroundColor: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
-            <p className="font-medium text-sm" style={{ color: '#10b981' }}>✅ Done! Extracted {result.extracted} promises, saved {result.created} to database.</p>
-            <p className="text-xs mt-1" style={{ color: '#059669' }}>Go to the Promises tab to review and update statuses.</p>
-          </div>
-        )}
       </div>
+
+      {pendingPromises.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="font-semibold text-gray-900">Pending Verification</h3>
+            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full font-medium">{pendingPromises.length} Found</span>
+          </div>
+          
+          <div className="space-y-3">
+            {pendingPromises.map((p, index) => (
+              <div key={p.title} className={`card p-4 border ${p.isDuplicate ? 'border-red-200 bg-red-50/30' : 'border-yellow-200 bg-yellow-50/30'}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-gray-900 text-sm">{p.title}</h4>
+                      {p.isDuplicate && (
+                        <span className="bg-red-100 text-red-800 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded">
+                          Duplicate
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-700 text-sm mb-2">{p.description}</p>
+                    <div className="flex items-center gap-2">
+                      <CategoryBadge category={p.category} />
+                      <span className="text-xs text-gray-500">{p.partyAbbreviation} · {p.election}</span>
+                    </div>
+                    {p.isDuplicate && (
+                      <p className="text-xs text-red-600 mt-2 font-medium">
+                        ⚠️ High similarity to: "{p.duplicateOf}"
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2 flex-shrink-0">
+                    <button 
+                      onClick={() => handleAdd(p, index)} 
+                      disabled={savingStatus[p.title] === 'saving' || p.isDuplicate}
+                      className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded font-medium disabled:opacity-50 transition-colors">
+                      {savingStatus[p.title] === 'saving' ? 'Adding...' : p.isDuplicate ? 'Already in DB' : 'Add to DB'}
+                    </button>
+                    <button 
+                      onClick={() => handleDiscard(index)}
+                      disabled={savingStatus[p.title] === 'saving'}
+                      className="text-xs bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded font-medium disabled:opacity-50 transition-colors">
+                      Discard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

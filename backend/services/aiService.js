@@ -68,50 +68,80 @@ ${truncated}
 
 // Extract promises
 const extractPromises = async (text, category = null) => {
-  const truncated = text.slice(0, 12000);
+  // Chunking to handle larger manifestos (process up to 3 chunks max to prevent timeouts)
+  const CHUNK_SIZE = 12000;
+  const chunks = [];
+  for (let i = 0; i < text.length && chunks.length < 3; i += CHUNK_SIZE) {
+    chunks.push(text.slice(i, i + CHUNK_SIZE));
+  }
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "user",
-        content: `
+  const extractFromChunk = async (chunkText) => {
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: `
 You are a political fact checker.
 
-Extract 10-20 specific promises.
+Extract up to 15 specific promises from the following manifesto text.
 
 ${category ? `Focus only on ${category}` : ""}
 
-Return ONLY JSON:
+Return ONLY a JSON object with a single key "promises" containing an array of objects:
 
-[
- {
-   "title":"...",
-   "description":"...",
-   "category":"..."
- }
-]
+{
+  "promises": [
+    {
+      "title":"...",
+      "description":"...",
+      "category":"..."
+    }
+  ]
+}
 
 Manifesto:
-${truncated}
+${chunkText}
 `,
-      },
-    ],
-  });
+          },
+        ],
+      });
 
-  try {
-    const response = completion.choices[0].message.content;
+      const response = completion.choices[0].message.content;
+      const parsed = JSON.parse(response);
+      return parsed.promises || [];
+    } catch (error) {
+      console.error("Extract Promises Error for chunk:", error);
+      return [];
+    }
+  };
 
-    const clean = response
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+  // Run extractions in parallel
+  const results = await Promise.all(chunks.map(extractFromChunk));
+  const allPromises = results.flat();
 
-    return JSON.parse(clean);
-  } catch (error) {
-    console.error("Extract Promises Error:", error);
-    return [];
+  // Deduplication based on title to ensure robustness
+  const uniquePromises = [];
+  const seenTitles = new Set();
+  
+  for (const p of allPromises) {
+    if (!p.title || !p.description) continue;
+    
+    // Normalize string to help catch duplicates
+    const normalizedTitle = p.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    if (!seenTitles.has(normalizedTitle) && normalizedTitle.length > 5) {
+      seenTitles.add(normalizedTitle);
+      uniquePromises.push({
+        title: p.title,
+        description: p.description,
+        category: p.category || "Other"
+      });
+    }
   }
+
+  return uniquePromises;
 };
 
 // Analyze promise fulfillment

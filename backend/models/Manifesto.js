@@ -9,6 +9,8 @@ const manifestoSchema = new mongoose.Schema({
     enum: ['Lok Sabha', 'Rajya Sabha', 'State Assembly', 'Local Body'],
     default: 'Lok Sabha'
   },
+  pdfName: { type: String },
+  pdfSize: { type: Number },
   rawText: { type: String }, // full extracted text
   summary: { type: String }, // AI-generated summary
   categories: [{ type: String }], 
