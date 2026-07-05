@@ -17,6 +17,8 @@ export default function ManifestosPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [form, setForm] = useState({ partyId: '', election: '', year: '', electionType: 'Lok Sabha', text: '' });
   const [uploading, setUploading] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState('text');
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     Promise.all([manifestoAPI.getAll(), partyAPI.getAll()])
@@ -66,6 +68,40 @@ export default function ManifestosPage() {
     finally { setUploading(false); }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      alert('Please select a valid PDF file.');
+      setSelectedFile(null);
+      e.target.value = null; // reset
+      return;
+    }
+    setSelectedFile(file);
+  };
+
+  const handleUploadPDF = async () => {
+    if (!form.partyId || !form.election || !form.year || !selectedFile) return alert('Fill all fields and select a PDF');
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('partyId', form.partyId);
+      formData.append('election', form.election);
+      formData.append('year', form.year);
+      formData.append('electionType', form.electionType);
+      formData.append('pdf', selectedFile);
+
+      await manifestoAPI.uploadPDF(formData);
+      alert('Manifesto PDF submitted! Processing in background...');
+      setShowUpload(false);
+      setSelectedFile(null);
+      // Refresh
+      const { data } = await manifestoAPI.getAll();
+      setManifestos(data);
+    } catch (e) { alert('Upload failed: ' + (e.response?.data?.message || e.message)); }
+    finally { setUploading(false); }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -83,7 +119,7 @@ export default function ManifestosPage() {
       {/* Upload form */}
       {showUpload && isAdmin && (
         <div className="card p-5 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Add Manifesto Text</h2>
+          <h2 className="font-semibold text-gray-900 mb-4">Add Manifesto</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <select value={form.partyId} onChange={e => setForm({ ...form, partyId: e.target.value })}
               className="border border-gray-200 rounded px-3 py-2 text-sm">
@@ -101,11 +137,39 @@ export default function ManifestosPage() {
               {['Lok Sabha', 'State Assembly', 'Local Body'].map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
-          <textarea rows={6} placeholder="Paste manifesto text here..." value={form.text}
-            onChange={e => setForm({ ...form, text: e.target.value })}
-            className="w-full border border-gray-200 rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:border-primary" />
+          
+          {/* Toggle */}
+          <div className="flex gap-4 mb-3 border-b border-gray-100 pb-3">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="radio" name="uploadMethod" checked={uploadMethod === 'text'} onChange={() => setUploadMethod('text')} className="accent-primary" />
+              Paste Text
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="radio" name="uploadMethod" checked={uploadMethod === 'pdf'} onChange={() => setUploadMethod('pdf')} className="accent-primary" />
+              Upload PDF
+            </label>
+          </div>
+
+          {uploadMethod === 'text' ? (
+            <textarea rows={6} placeholder="Paste manifesto text here..." value={form.text}
+              onChange={e => setForm({ ...form, text: e.target.value })}
+              className="w-full border border-gray-200 rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:border-primary" />
+          ) : (
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center mb-3 bg-gray-50">
+              <input type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" id="pdf-upload" />
+              <label htmlFor="pdf-upload" className="cursor-pointer btn-secondary text-sm mb-2">
+                Choose PDF file
+              </label>
+              {selectedFile ? (
+                <p className="text-sm text-gray-700">Selected: <span className="font-semibold text-primary">{selectedFile.name}</span></p>
+              ) : (
+                <p className="text-sm text-gray-500">No file selected (PDF only)</p>
+              )}
+            </div>
+          )}
+
           <div className="flex gap-2">
-            <button onClick={handleUploadText} disabled={uploading} className="btn-primary disabled:opacity-60">
+            <button onClick={uploadMethod === 'text' ? handleUploadText : handleUploadPDF} disabled={uploading} className="btn-primary disabled:opacity-60">
               {uploading ? 'Submitting...' : 'Submit & Process'}
             </button>
             <button onClick={() => setShowUpload(false)} className="btn-secondary">Cancel</button>

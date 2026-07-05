@@ -1,18 +1,7 @@
 const Manifesto = require('../models/Manifesto');
 const aiService = require('../services/aiService');
 const ragService = require('../services/ragService');
-const multer = require('multer');
 const pdfParse = require('pdf-parse');
-
-// Multer config for in-memory PDF upload
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') cb(null, true);
-    else cb(new Error('Only PDF files allowed'));
-  }
-});
 
 // GET /api/manifestos
 
@@ -67,7 +56,7 @@ const getManifestoById = async (req, res) => {
 };
 
 // POST /api/manifestos/upload  (admin only) - Upload PDF
-const uploadManifesto = async (req, res) => {
+const uploadManifestoPDF = async (req, res) => {
   const { partyId, election, year, electionType } = req.body;
 
   if (!req.file) return res.status(400).json({ message: 'PDF file required' });
@@ -90,6 +79,8 @@ const uploadManifesto = async (req, res) => {
     year: parseInt(year),
     electionType,
     rawText,
+    pdfName: req.file.originalname,
+    pdfSize: req.file.size,
     status: 'processing',
     uploadedBy: req.user._id,
   });
@@ -147,4 +138,4 @@ async function processManifesto(manifestoId, rawText) {
   }
 }
 
-module.exports = { getManifestos, getManifestoById, uploadManifesto, addManifestoText, upload };
+module.exports = { getManifestos, getManifestoById, uploadManifestoPDF, addManifestoText };
